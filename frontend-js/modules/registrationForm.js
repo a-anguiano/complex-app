@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export default class RegistrationForm {
   constructor() {
-    //this._csrf = document.querySelector('[name="_csrf"]').value
+    this._csrf = document.querySelector('[name="_csrf"]').value //select based on name
     this.form = document.querySelector("#registration-form")
     this.allFields = document.querySelectorAll("#registration-form .form-control")  //returns an array of elements
     this.insertValidationElements()
@@ -33,6 +33,7 @@ export default class RegistrationForm {
     this.password.addEventListener("keyup", () => {
       this.isDifferent(this.password, this.passwordHandler)
     })
+    //runs when a field "loses focus"
     this.username.addEventListener("blur", () => {
       this.isDifferent(this.username, this.usernameHandler)
     })
