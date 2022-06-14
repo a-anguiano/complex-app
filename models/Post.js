@@ -1,6 +1,6 @@
 const postsCollection = require('../db').db().collection('posts')
 const followsCollection = require('../db').db().collection('follows')   //not strictly mvc
-const ObjectID = require('mongodb').ObjectId
+const ObjectID = require('mongodb').ObjectID
 const User = require('./User')
 const sanitizeHTML = require('sanitize-html')
 
@@ -31,23 +31,22 @@ Post.prototype.validate = function() {
     if (this.data.body == "") {this.errors.push("You must provide post content")}
 }
 
-Post.prototype.create = function() {
-    return new Promise((resolve, reject) => {
-        this.cleanUp()
-        this.validate()
-        if (!this.errors.length) {
-            // save post into data base
-            postsCollection.insertOne(this.data).then((info) => {
-                resolve(info.insertedId)
-            }).catch(() => {
-                this.errors.push("Please try again later")
-                reject(this.errors)
-            })
+Post.prototype.create = async function() {
+    this.cleanUp()
+    this.validate()
+    if (!this.errors.length) {
+        // save post into data base
+        try {
+            const info = await postsCollection.insertOne(this.data)
+            return info.insertedId
+        } catch(err) {
+            this.errors.push("Please try again later.")
+            throw this.errors
         }
-        else {
-            reject(this.errors)
-        }
-    })
+    }
+    else {
+        throw this.errors
+    }
 }
 
 Post.prototype.update = function() {
@@ -58,8 +57,7 @@ Post.prototype.update = function() {
                 //actually update the db
                 let status = await this.actuallyUpdate()
                 resolve(status)
-            }
-            else {
+            } else {
                 reject()
             }
         } catch {
@@ -127,8 +125,7 @@ Post.findSingleById = function(id, visitorId) {
         if (posts.length) {
             console.log(posts[0])
             resolve(posts[0])
-        }
-        else {
+        } else {
             reject()
         }
     })
